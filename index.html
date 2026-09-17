@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emil & Həbibə - Toy Dəvətnaməsi və İnteraktiv Masa Planı</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#FFFEFA',
+                            100: '#FAF6EF',
+                            200: '#F5EFE3',
+                            300: '#EFE5D2',
+                            400: '#E4D3B4'
+                        },
+                        gold: {
+                            100: '#FDF7E7',
+                            300: '#E7C883',
+                            400: '#D4AF37',
+                            500: '#C5A059',
+                            600: '#A37F36',
+                            700: '#826224'
+                        },
+                        charcoal: {
+                            700: '#4A4A4A',
+                            800: '#333333',
+                            900: '#1A1A1A'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                        cursive: ['"Great Vibes"', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FAF6EF;
+            color: #333333;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Light luxurious metallic gold text gradient */
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #B8860B 0%, #D4AF37 40%, #AA771C 70%, #996515 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gold-button-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #C5A059 50%, #B8860B 100%);
+        }
+
+        .gold-button-gradient:hover {
+            background: linear-gradient(135deg, #E5C048 0%, #D4AF37 50%, #C5A059 100%);
+        }
+
+        /* Glassmorphism on light theme */
+        .glass-card-light {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 10px 30px -5px rgba(212, 175, 55, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.03);
+        }
+
+        /* Floating golden dust particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: floatParticle 14s infinite linear;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            20% { opacity: 0.7; }
+            80% { opacity: 0.7; }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Active highlight for target table */
+        @keyframes pulseGlowGold {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.8); }
+            70% { box-shadow: 0 0 0 18px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+
+        .table-active {
+            animation: pulseGlowGold 1.6s infinite;
+            border-color: #D4AF37 !important;
+            background-color: #FFFDF7 !important;
+            transform: scale(1.03);
+            z-index: 20;
+        }
+
+        .seat-highlighted {
+            background-color: #D4AF37 !important;
+            transform: scale(1.3);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.9);
+            z-index: 30;
+        }
+
+        /* Category Color Badges */
+        .cat-yaxin { background-color: #FFF8E7; border-color: #E2B93B; text-color: #8C6200; }
+        .cat-esger { background-color: #F0F7FF; border-color: #60A5FA; text-color: #1E40AF; }
+        .cat-sinif { background-color: #FDF2F8; border-color: #F472B6; text-color: #9D174D; }
+        .cat-univer { background-color: #F0FDF4; border-color: #4ADE80; text-color: #166534; }
+        .cat-dostlar { background-color: #FAF5FF; border-color: #C084FC; text-color: #6B21A8; }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF6EF;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C5A059;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D4AF37;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen pb-12 selection:bg-gold-300 selection:text-charcoal-900">
+
+    <div id="particles-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <!-- Music Control Float Button -->
+    <div class="fixed top-6 right-6 z-50">
+        <button id="musicToggleBtn" onclick="toggleAudio()" aria-label="Musiqini Yandır/Söndür" 
+                class="glass-card-light w-13 h-13 p-3.5 rounded-full flex items-center justify-center text-gold-600 hover:text-gold-700 transition duration-300 shadow-xl border border-gold-400/40 hover:scale-105 active:scale-95">
+            <i id="musicIcon" class="fas fa-music text-lg"></i>
+        </button>
+    </div>
+
+    <!-- Hidden audio element for romantic ambient music -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=wedding-waltz-113063.mp3" type="audio/mpeg">
+    </audio>
+
+    <header class="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4 py-12">
+        <div class="max-w-3xl w-full mx-auto glass-card-light p-8 md:p-14 rounded-3xl border border-gold-400/40 shadow-2xl relative overflow-hidden">
+            
+            <!-- Elegant Corner Ornaments -->
+            <div class="absolute top-3 left-4 text-gold-500/40 text-2xl font-serif">❖</div>
+            <div class="absolute top-3 right-4 text-gold-500/40 text-2xl font-serif">❖</div>
+            <div class="absolute bottom-3 left-4 text-gold-500/40 text-2xl font-serif">❖</div>
+            <div class="absolute bottom-3 right-4 text-gold-500/40 text-2xl font-serif">❖</div>
+
+            <p class="text-gold-600 font-serif tracking-[0.25em] uppercase text-xs md:text-sm font-semibold mb-2">Toy Dəvətnaməsi</p>
+            
+            <!-- Bride & Groom Names -->
+            <h1 class="font-cursive text-6xl md:text-8xl gold-gradient-text my-2 leading-tight py-2 drop-shadow-sm">
+                Emil & Həbibə
+            </h1>
+
+            <p class="text-charcoal-700 font-serif italic text-base md:text-lg max-w-lg mx-auto my-3 leading-relaxed">
+                "Məhəbbət iki qəlbin bir vurması, bir gələcəyə birlikdə addımlamasıdır. Bu unudulmaz günümüzdə sizi yanımızda görməkdən şad olarıq."
+            </p>
+
+            <div class="w-32 h-0.5 bg-gradient-to-r from-transparent via-gold-400 to-transparent mx-auto my-6"></div>
+
+            <!-- Date, Time, Venue Info -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6 text-charcoal-800">
+                <div class="flex flex-col items-center p-4 rounded-2xl bg-white/70 border border-gold-300/40 shadow-sm">
+                    <i class="far fa-calendar-alt text-gold-600 text-2xl mb-2"></i>
+                    <span class="font-serif font-bold text-base text-gold-700">27 Fevral 2027</span>
+                    <span class="text-xs text-charcoal-700 mt-0.5">Şənbə günü</span>
+                </div>
+                <div class="flex flex-col items-center p-4 rounded-2xl bg-white/70 border border-gold-300/40 shadow-sm">
+                    <i class="far fa-clock text-gold-600 text-2xl mb-2"></i>
+                    <span class="font-serif font-bold text-base text-gold-700">Saat 18:00</span>
+                    <span class="text-xs text-charcoal-700 mt-0.5">Qonaqların qarşılanması</span>
+                </div>
+                <div class="flex flex-col items-center p-4 rounded-2xl bg-white/70 border border-gold-300/40 shadow-sm">
+                    <i class="fas fa-map-marker-alt text-gold-600 text-2xl mb-2"></i>
+                    <span class="font-serif font-bold text-base text-gold-700">"Gülüstan" Sarayı</span>
+                    <span class="text-xs text-charcoal-700 mt-0.5">Bakı şən., İstiqlaliyyət k. 12</span>
+                </div>
+            </div>
+
+            <!-- Countdown Timer -->
+            <div class="my-8">
+                <p class="text-xs text-gold-700 font-semibold uppercase tracking-widest mb-3">Toya Qalan Vaxt</p>
+                <div class="grid grid-cols-4 gap-2 md:gap-4 max-w-md mx-auto">
+                    <div class="bg-white/90 border border-gold-300/60 rounded-2xl p-2.5 md:p-3 shadow-sm">
+                        <span id="days" class="block text-2xl md:text-3xl font-serif font-bold text-gold-600">00</span>
+                        <span class="text-[10px] md:text-xs text-charcoal-700 uppercase font-medium">Gün</span>
+                    </div>
+                    <div class="bg-white/90 border border-gold-300/60 rounded-2xl p-2.5 md:p-3 shadow-sm">
+                        <span id="hours" class="block text-2xl md:text-3xl font-serif font-bold text-gold-600">00</span>
+                        <span class="text-[10px] md:text-xs text-charcoal-700 uppercase font-medium">Saat</span>
+                    </div>
+                    <div class="bg-white/90 border border-gold-300/60 rounded-2xl p-2.5 md:p-3 shadow-sm">
+                        <span id="minutes" class="block text-2xl md:text-3xl font-serif font-bold text-gold-600">00</span>
+                        <span class="text-[10px] md:text-xs text-charcoal-700 uppercase font-medium">Dəqiqə</span>
+                    </div>
+                    <div class="bg-white/90 border border-gold-300/60 rounded-2xl p-2.5 md:p-3 shadow-sm">
+                        <span id="seconds" class="block text-2xl md:text-3xl font-serif font-bold text-gold-600">00</span>
+                        <span class="text-[10px] md:text-xs text-charcoal-700 uppercase font-medium">Saniyə</span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#guest-search-section" class="inline-flex items-center gap-2 px-8 py-3.5 gold-button-gradient text-white font-semibold rounded-full transition duration-300 shadow-md hover:shadow-lg text-sm tracking-wide transform hover:-translate-y-0.5">
+                <span>Masa Planında Oturacağınızı Tapın</span>
+                <i class="fas fa-arrow-down animate-bounce text-xs"></i>
+            </a>
+        </div>
+    </header>
+
+    <main id="guest-search-section" class="relative z-10 max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Section Header -->
+        <div class="text-center mb-8">
+            <h2 class="font-serif text-3xl md:text-5xl text-gold-700 font-bold mb-2">Restoran Masa Planı</h2>
+            <p class="text-charcoal-700 text-sm md:text-base max-w-2xl mx-auto">
+                Ad və soyadınızı yazaraq sizə ayrılmış masanı və oturacağı anında tapın. Masalar dostluq və yaxınlıq qruplarına görə xüsusi planlaşdırılmışdır.
+            </p>
+        </div>
+
+        <!-- Search Input Card -->
+        <div class="glass-card-light p-6 rounded-3xl max-w-3xl mx-auto mb-8 border border-gold-400/40 shadow-lg">
+            <div class="relative">
+                <label for="guestSearchInput" class="block text-xs font-bold text-gold-700 mb-2 uppercase tracking-wider">
+                    <i class="fas fa-search me-1 text-gold-500"></i> Qonaq Adı ilə Axtarış
+                </label>
+                <div class="relative">
+                    <input type="text" id="guestSearchInput" autocomplete="off" placeholder="Ad və ya soyadınızı daxil edin (məsələn: Rauf, Elcan, Leyla...)" 
+                           class="w-full bg-white border border-gold-300 rounded-2xl px-4 py-3.5 pl-11 text-charcoal-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition text-sm md:text-base shadow-inner">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gold-500"></i>
+                    <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gold-600 p-1">
+                        <i class="fas fa-times-circle text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Autocomplete Dropdown -->
+                <div id="searchDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white/95 backdrop-blur-md border border-gold-300 rounded-2xl shadow-2xl max-h-64 overflow-y-auto z-50 divide-y divide-gray-100">
+                </div>
+            </div>
+
+            <!-- Quick Demo Guests Suggestions -->
+            <div class="mt-4 pt-3 border-t border-gold-200 flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-charcoal-700 font-medium me-1">Sürətli axtarış nümunələri:</span>
+                <button onclick="quickSearch('Rauf Məmmədov')" class="px-3 py-1 bg-cream-100 hover:bg-gold-100 text-gold-700 rounded-lg border border-gold-300/60 transition font-medium">Rauf Məmmədov</button>
+                <button onclick="quickSearch('Elcan Həsənov')" class="px-3 py-1 bg-cream-100 hover:bg-gold-100 text-gold-700 rounded-lg border border-gold-300/60 transition font-medium">Elcan Həsənov</button>
+                <button onclick="quickSearch('Orxan Rəhimov')" class="px-3 py-1 bg-cream-100 hover:bg-gold-100 text-gold-700 rounded-lg border border-gold-300/60 transition font-medium">Orxan Rəhimov</button>
+                <button onclick="quickSearch('Leyla Qasımova')" class="px-3 py-1 bg-cream-100 hover:bg-gold-100 text-gold-700 rounded-lg border border-gold-300/60 transition font-medium">Leyla Qasımova</button>
+            </div>
+        </div>
+
+        <!-- Search Result Notification Banner -->
+        <div id="searchResultBanner" class="hidden glass-card-light max-w-3xl mx-auto mb-8 p-6 rounded-3xl border-2 border-gold-400 bg-gold-50/80 text-center animate-fade-in shadow-xl">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="text-left">
+                    <div class="inline-block px-3 py-1 bg-gold-100 text-gold-800 text-xs rounded-full font-bold mb-1 border border-gold-300">
+                        <i class="fas fa-check-circle me-1 text-gold-600"></i> Tapılan Qonaq
+                    </div>
+                    <h3 id="resGuestName" class="text-2xl font-serif font-bold text-charcoal-900">--</h3>
+                    <p class="text-xs text-charcoal-700 mt-1">Qrup: <span id="resGuestCategory" class="font-bold text-gold-700">--</span></p>
+                </div>
+                <div class="flex items-center gap-6 bg-white px-6 py-3.5 rounded-2xl border border-gold-300 shadow-sm">
+                    <div class="text-center">
+                        <span class="block text-xs text-charcoal-700 font-semibold uppercase">Masa №</span>
+                        <span id="resTableNum" class="text-3xl font-serif font-extrabold text-gold-600">--</span>
+                    </div>
+                    <div class="h-10 w-px bg-gold-300"></div>
+                    <div class="text-center">
+                        <span class="block text-xs text-charcoal-700 font-semibold uppercase">Oturacaq №</span>
+                        <span id="resSeatNum" class="text-3xl font-serif font-extrabold text-gold-600">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Filters Buttons bar -->
+        <div class="mb-8">
+            <p class="text-center text-xs text-charcoal-700 font-bold uppercase tracking-wider mb-3">Kategoriya üzrə Masaları Süzün:</p>
+            <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3">
+                <button onclick="filterCategory('all')" id="btn-cat-all" class="cat-btn active border px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition bg-gold-500 text-white border-gold-500 shadow-sm">
+                    <i class="fas fa-th me-1.5"></i> Bütün Masalar (50)
+                </button>
+                <button onclick="filterCategory('yaxin')" id="btn-cat-yaxin" class="cat-btn border px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition bg-white text-gold-800 border-amber-300 hover:bg-amber-50">
+                    <i class="fas fa-heart text-amber-500 me-1.5"></i> Yaxın Dostlar (Masalar 1-10)
+                </button>
+                <button onclick="filterCategory('esger')" id="btn-cat-esger" class="cat-btn border px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition bg-white text-blue-800 border-blue-300 hover:bg-blue-50">
+                    <i class="fas fa-shield-alt text-blue-500 me-1.5"></i> Əsgər Yoldaşları (Masalar 11-20)
+                </button>
+                <button onclick="filterCategory('sinif')" id="btn-cat-sinif" class="cat-btn border px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition bg-white text-pink-800 border-pink-300 hover:bg-pink-50">
+                    <i class="fas fa-user-graduate text-pink-500 me-1.5"></i> Sinif Yoldaşları (Masalar 21-30)
+                </button>
+                <button onclick="filterCategory('univer')" id="btn-cat-univer" class="cat-btn border px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-50">
+                    <i class="fas fa-university text-emerald-500 me-1.5"></i> Universitet Yoldaşları (Masalar 31-40)
+                </button>
+                <button onclick="filterCategory('dostlar')" id="btn-cat-dostlar" class="cat-btn border px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition bg-white text-purple-800 border-purple-300 hover:bg-purple-50">
+                    <i class="fas fa-users text-purple-500 me-1.5"></i> Dostlar (Masalar 41-50)
+                </button>
+            </div>
+        </div>
+
+        <!-- Hall Map Card -->
+        <div class="glass-card-light p-4 md:p-8 rounded-3xl border border-gold-300 shadow-2xl overflow-x-auto relative">
+            
+            <!-- Stage / Main Groom-Bride Table Design -->
+            <div class="w-full max-w-2xl mx-auto mb-10 text-center relative">
+                <div class="gold-button-gradient text-white font-serif font-bold py-4 px-8 rounded-2xl shadow-lg border-2 border-white tracking-widest uppercase text-sm md:text-base flex items-center justify-center gap-3">
+                    <i class="fas fa-crown text-yellow-200 text-lg"></i>
+                    BƏY VƏ GƏLİN SƏHNƏSİ (EMİL & HƏBİBƏ)
+                    <i class="fas fa-crown text-yellow-200 text-lg"></i>
+                </div>
+                <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-gold-600 text-xs font-serif font-semibold uppercase tracking-widest bg-cream-100 px-3 py-0.5 rounded-full border border-gold-300">
+                    ▼ RƏQS MEYDANÇASI ▼
+                </div>
+            </div>
+
+            <!-- Dance Floor Center Area Indicator -->
+            <div class="my-8 border-y-2 border-dashed border-gold-300/60 py-6 text-center bg-gold-50/30 rounded-xl">
+                <span class="text-xs md:text-sm uppercase tracking-widest text-gold-700 font-serif font-bold">
+                    <i class="fas fa-music me-2 text-gold-500"></i> MƏRKƏZİ RƏQS MEYDANÇASI <i class="fas fa-music ms-2 text-gold-500"></i>
+                </span>
+            </div>
+
+            <div id="hallLayout" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6 min-w-[720px] md:min-w-0 p-2">
+                <!-- 50 Rectangular Tables rendered by JS -->
+            </div>
+        </div>
+    </main>
+
+    <div id="tableModal" class="fixed inset-0 bg-charcoal-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card-light max-w-lg w-full rounded-3xl border-2 border-gold-400 p-6 md:p-8 relative animate-scale-up shadow-2xl bg-white">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-charcoal-900 text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <span id="modalCatBadge" class="inline-block px-3 py-1 text-xs font-bold rounded-full mb-1 border">--</span>
+                <h3 id="modalTitle" class="font-serif text-3xl font-bold text-charcoal-900 mt-1">Masa --</h3>
+                <p class="text-xs text-charcoal-700 mt-1 font-medium">Tutum: 12 nəfərlik düzbucaqlı masa</p>
+            </div>
+
+            <!-- Detailed Visual Table in Modal -->
+            <div class="bg-cream-100 p-5 rounded-2xl border border-gold-300 mb-6 shadow-inner">
+                <!-- Top Row (6 Seats) -->
+                <div id="modalTopSeats" class="grid grid-cols-6 gap-2 mb-3"></div>
+                
+                <!-- Main Rectangular Table Surface -->
+                <div class="gold-button-gradient h-16 rounded-xl border-2 border-white flex items-center justify-center shadow-md my-2">
+                    <span id="modalTableName" class="font-serif font-bold text-white text-lg tracking-wider">MASA --</span>
+                </div>
+                
+                <!-- Bottom Row (6 Seats) -->
+                <div id="modalBottomSeats" class="grid grid-cols-6 gap-2 mt-3"></div>
+            </div>
+
+            <!-- Guest List at this table -->
+            <div>
+                <h4 class="text-xs font-bold text-gold-700 uppercase tracking-wider mb-2">Bu Masadakı Qonaqlar:</h4>
+                <div id="modalGuestList" class="max-h-48 overflow-y-auto space-y-2 text-xs pr-1">
+                    <!-- Guest list generated via JS -->
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button onclick="closeModal()" class="px-8 py-2.5 gold-button-gradient text-white font-bold rounded-xl transition text-xs uppercase tracking-wider shadow-md">
+                    Bağla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-20 text-center text-xs text-charcoal-700 border-t border-gold-300/50 pt-8 pb-6 font-medium">
+        <p>© 2027 Emil & Həbibə - Toy Dəvətnaməsi. Bütün hüquqlar qorunur.</p>
+        <p class="mt-1 text-[11px] text-gold-700 font-serif italic">Sizinlə bu xüsusi günü paylaşmaqdan şərəf duyuruq!</p>
+    </footer>
+
+    <script>
+        // Data & Category Configurations
+        const TOTAL_TABLES = 50;
+        const SEATS_PER_TABLE = 12;
+
+        // Categories Map
+        const categories = {
+            'yaxin': { name: 'Yaxın Dostlar', range: [1, 10], bgClass: 'bg-amber-50', borderClass: 'border-amber-300', textClass: 'text-amber-800', badgeClass: 'bg-amber-100 text-amber-800 border-amber-300' },
+            'esger': { name: 'Əsgər Yoldaşları', range: [11, 20], bgClass: 'bg-blue-50', borderClass: 'border-blue-300', textClass: 'text-blue-800', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
+            'sinif': { name: 'Sinif Yoldaşları', range: [21, 30], bgClass: 'bg-pink-50', borderClass: 'border-pink-300', textClass: 'text-pink-800', badgeClass: 'bg-pink-100 text-pink-800 border-pink-300' },
+            'univer': { name: 'Universitet Yoldaşları', range: [31, 40], bgClass: 'bg-emerald-50', borderClass: 'border-emerald-300', textClass: 'text-emerald-800', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+            'dostlar': { name: 'Dostlar', range: [41, 50], bgClass: 'bg-purple-50', borderClass: 'border-purple-300', textClass: 'text-purple-800', badgeClass: 'bg-purple-100 text-purple-800 border-purple-300' }
+        };
+
+        function getCategoryForTable(tableNum) {
+            if (tableNum <= 10) return 'yaxin';
+            if (tableNum <= 20) return 'esger';
+            if (tableNum <= 30) return 'sinif';
+            if (tableNum <= 40) return 'univer';
+            return 'dostlar';
+        }
+
+        // Realistic Sample Guests Data categorized as requested
+        const sampleGuests = [
+            // Yaxın Dostlar (Masalar 1-10)
+            { name: "Rauf Məmmədov", table: 1, seat: 1, cat: "yaxin" },
+            { name: "Leyla Qasımova", table: 1, seat: 2, cat: "yaxin" },
+            { name: "Fuad İbrahimov", table: 2, seat: 5, cat: "yaxin" },
+            { name: "Aysel Quliyeva", table: 3, seat: 3, cat: "yaxin" },
+
+            // Əsgər Yoldaşları (Masalar 11-20)
+            { name: "Elcan Həsənov", table: 11, seat: 3, cat: "esger" },
+            { name: "Vüsal Əliyev", table: 11, seat: 4, cat: "esger" },
+            { name: "Kamran Sadıqov", table: 14, seat: 1, cat: "esger" },
+            { name: "Tural Səfərov", table: 18, seat: 6, cat: "esger" },
+
+            // Sinif Yoldaşları (Masalar 21-30)
+            { name: "Orxan Rəhimov", table: 21, seat: 2, cat: "sinif" },
+            { name: "Nigar Sultanova", table: 21, seat: 3, cat: "sinif" },
+            { name: "Rəşad Nəzirov", table: 25, seat: 8, cat: "sinif" },
+            { name: "Sevda Hüseynova", table: 28, seat: 10, cat: "sinif" },
+
+            // Universitet Yoldaşları (Masalar 31-40)
+            { name: "Məmməd Nağıyev", table: 31, seat: 4, cat: "univer" },
+            { name: "Günel Rüstəmova", table: 31, seat: 5, cat: "univer" },
+            { name: "Fərid Mahmudov", table: 35, seat: 7, cat: "univer" },
+            { name: "Cavid Məlikov", table: 39, seat: 12, cat: "univer" },
+
+            // Dostlar (Masalar 41-50)
+            { name: "Kənan Baqırov", table: 41, seat: 1, cat: "dostlar" },
+            { name: "Zeynəb Abbasova", table: 42, seat: 6, cat: "dostlar" },
+            { name: "Elnur Babayev", table: 45, seat: 9, cat: "dostlar" },
+            { name: "Samir Əhmədov", table: 50, seat: 12, cat: "dostlar" }
+        ];
+
+        // Fill remaining seats with formatted realistic guests
+        let guestsDatabase = [...sampleGuests];
+        const firstNames = ["Anar", "Teymur", "Səbinə", "Eldar", "Xədicə", "Rövşən", "Dilarə", "Musa", "Ləman", "İlkin", "Səmayə", "Vaqif"];
+        const lastNames = ["Məmmədov", "Əliyev", "Həsənov", "Hüseynov", "Qasımov", "Səfərov", "Rəhimov", "Sultanzadə"];
+
+        for (let t = 1; t <= TOTAL_TABLES; t++) {
+            const catKey = getCategoryForTable(t);
+            for (let s = 1; s <= SEATS_PER_TABLE; s++) {
+                const exists = guestsDatabase.some(g => g.table === t && g.seat === s);
+                if (!exists) {
+                    const fn = firstNames[(t + s) % firstNames.length];
+                    const ln = lastNames[(t * s) % lastNames.length];
+                    guestsDatabase.push({
+                        name: `${fn} ${ln}`,
+                        table: t,
+                        seat: s,
+                        cat: catKey
+                    });
+                }
+            }
+        }
+
+        // DOM Elements
+        const hallLayout = document.getElementById('hallLayout');
+        const guestSearchInput = document.getElementById('guestSearchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+        const searchResultBanner = document.getElementById('searchResultBanner');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+        let activeCategoryFilter = 'all';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initParticles();
+            initCountdown();
+            renderHallTables();
+            setupSearchListeners();
+        });
+
+        // Background floating golden particles
+        function initParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 20;
+            for (let i = 0; i < particleCount; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = Math.random() * 6 + 4;
+                p.style.width = `${size}px`;
+                p.style.height = `${size}px`;
+                p.style.left = `${Math.random() * 100}vw`;
+                p.style.animationDelay = `${Math.random() * 10}s`;
+                p.style.animationDuration = `${10 + Math.random() * 10}s`;
+                p.style.background = 'radial-gradient(circle, rgba(212,175,55,0.8) 0%, rgba(245,239,227,0.1) 100%)';
+                p.style.borderRadius = '50%';
+                container.appendChild(p);
+            }
+        }
+
+        // Countdown Timer for 27 February 2027
+        function initCountdown() {
+            const weddingDate = new Date('February 27, 2027 18:00:00').getTime();
+
+            function updateTimer() {
+                const now = new Date().getTime();
+                const diff = weddingDate - now;
+
+                if (diff <= 0) {
+                    document.getElementById('days').innerText = "00";
+                    document.getElementById('hours').innerText = "00";
+                    document.getElementById('minutes').innerText = "00";
+                    document.getElementById('seconds').innerText = "00";
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('days').innerText = days < 10 ? `0${days}` : days;
+                document.getElementById('hours').innerText = hours < 10 ? `0${hours}` : hours;
+                document.getElementById('minutes').innerText = minutes < 10 ? `0${minutes}` : minutes;
+                document.getElementById('seconds').innerText = seconds < 10 ? `0${seconds}` : seconds;
+            }
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        // Render 50 Rectangular Tables
+        function renderHallTables() {
+            hallLayout.innerHTML = '';
+
+            for (let i = 1; i <= TOTAL_TABLES; i++) {
+                const catKey = getCategoryForTable(i);
+                const catInfo = categories[catKey];
+
+                const tableCard = document.createElement('div');
+                tableCard.id = `table-card-${i}`;
+                tableCard.dataset.category = catKey;
+                tableCard.className = `glass-card-light p-3 rounded-2xl border transition duration-300 cursor-pointer flex flex-col items-center justify-between group relative hover:shadow-lg ${catInfo.borderClass} ${catInfo.bgClass}`;
+                tableCard.onclick = () => openTableModal(i);
+
+                // Top 6 Seats
+                let topSeatsHtml = '<div class="grid grid-cols-6 gap-1 w-full mb-1.5">';
+                for (let s = 1; s <= 6; s++) {
+                    topSeatsHtml += `<div id="seat-dot-${i}-${s}" class="w-full h-2 rounded-full bg-gold-300/60 border border-gold-400/40 transition" title="Oturacaq ${s}"></div>`;
+                }
+                topSeatsHtml += '</div>';
+
+                // Rectangular Table Surface
+                const tableSurface = `
+                    <div class="w-full bg-white border border-gold-300 rounded-xl py-3 px-1 text-center shadow-sm group-hover:border-gold-500 transition">
+                        <span class="block font-serif font-bold text-charcoal-900 text-sm">Masa ${i}</span>
+                        <span class="block text-[9px] font-semibold text-gold-700 uppercase tracking-tight">${catInfo.name}</span>
+                    </div>
+                `;
+
+                // Bottom 6 Seats
+                let bottomSeatsHtml = '<div class="grid grid-cols-6 gap-1 w-full mt-1.5">';
+                for (let s = 7; s <= 12; s++) {
+                    bottomSeatsHtml += `<div id="seat-dot-${i}-${s}" class="w-full h-2 rounded-full bg-gold-300/60 border border-gold-400/40 transition" title="Oturacaq ${s}"></div>`;
+                }
+                bottomSeatsHtml += '</div>';
+
+                tableCard.innerHTML = topSeatsHtml + tableSurface + bottomSeatsHtml;
+                hallLayout.appendChild(tableCard);
+            }
+        }
+
+        // Filter Category Handler
+        function filterCategory(catKey) {
+            activeCategoryFilter = catKey;
+
+            // Update Active Buttons UI
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-gold-500', 'text-white');
+                btn.classList.add('bg-white');
+            });
+
+            const activeBtn = document.getElementById(`btn-cat-${catKey}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white');
+                activeBtn.classList.add('bg-gold-500', 'text-white');
+            }
+
+            // Dim or Highlight Table Cards
+            for (let i = 1; i <= TOTAL_TABLES; i++) {
+                const card = document.getElementById(`table-card-${i}`);
+                if (!card) continue;
+
+                if (catKey === 'all' || card.dataset.category === catKey) {
+                    card.style.opacity = '1';
+                    card.style.filter = 'none';
+                    card.style.transform = 'scale(1)';
+                } else {
+                    card.style.opacity = '0.35';
+                    card.style.filter = 'grayscale(60%)';
+                    card.style.transform = 'scale(0.97)';
+                }
+            }
+        }
+
+        // Setup Guest Search Listeners
+        function setupSearchListeners() {
+            guestSearchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim().toLowerCase();
+
+                if (query.length > 0) {
+                    clearSearchBtn.classList.remove('hidden');
+                } else {
+                    clearSearchBtn.classList.add('hidden');
+                    searchDropdown.classList.add('hidden');
+                    resetHighlights();
+                    return;
+                }
+
+                // Search in Database
+                const matches = guestsDatabase.filter(g => g.name.toLowerCase().includes(query)).slice(0, 8);
+
+                if (matches.length > 0) {
+                    searchDropdown.innerHTML = '';
+                    matches.forEach(guest => {
+                        const catInfo = categories[guest.cat];
+                        const item = document.createElement('div');
+                        item.className = 'p-3 hover:bg-gold-50 cursor-pointer transition flex justify-between items-center text-sm';
+                        item.innerHTML = `
+                            <div>
+                                <span class="font-semibold text-charcoal-900 block">${highlightMatch(guest.name, query)}</span>
+                                <span class="text-xs font-medium text-gold-700">${catInfo.name}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gold-800 font-serif font-bold bg-cream-200 px-2.5 py-1 rounded-lg border border-gold-300">Masa ${guest.table} | Oturacaq ${guest.seat}</span>
+                            </div>
+                        `;
+                        item.onclick = () => selectGuest(guest);
+                        searchDropdown.appendChild(item);
+                    });
+                    searchDropdown.classList.remove('hidden');
+                } else {
+                    searchDropdown.innerHTML = `<div class="p-4 text-center text-xs text-gray-500">Axtarışa uyğun qonaq tapılmadı</div>`;
+                    searchDropdown.classList.remove('hidden');
+                }
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                guestSearchInput.value = '';
+                clearSearchBtn.classList.add('hidden');
+                searchDropdown.classList.add('hidden');
+                resetHighlights();
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!guestSearchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                    searchDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        function highlightMatch(text, query) {
+            const index = text.toLowerCase().indexOf(query.toLowerCase());
+            if (index === -1) return text;
+            const before = text.substring(0, index);
+            const match = text.substring(index, index + query.length);
+            const after = text.substring(index + query.length);
+            return `${before}<span class="text-gold-700 font-bold underline bg-gold-100 px-0.5">${match}</span>${after}`;
+        }
+
+        function quickSearch(name) {
+            guestSearchInput.value = name;
+            guestSearchInput.dispatchEvent(new Event('input'));
+            const found = guestsDatabase.find(g => g.name.toLowerCase() === name.toLowerCase());
+            if (found) {
+                selectGuest(found);
+            }
+        }
+
+        function selectGuest(guest) {
+            searchDropdown.classList.add('hidden');
+            guestSearchInput.value = guest.name;
+
+            const catInfo = categories[guest.cat];
+
+            // Show Banner
+            document.getElementById('resGuestName').innerText = guest.name;
+            document.getElementById('resGuestCategory').innerText = catInfo.name;
+            document.getElementById('resTableNum').innerText = guest.table;
+            document.getElementById('resSeatNum').innerText = guest.seat;
+            searchResultBanner.classList.remove('hidden');
+
+            resetHighlights();
+
+            // Ensure category filter shows this table
+            if (activeCategoryFilter !== 'all' && activeCategoryFilter !== guest.cat) {
+                filterCategory('all');
+            }
+
+            // Highlight Target Table
+            const targetTableCard = document.getElementById(`table-card-${guest.table}`);
+            if (targetTableCard) {
+                targetTableCard.classList.add('table-active');
+
+                // Highlight Specific Seat Dot
+                const targetSeatDot = document.getElementById(`seat-dot-${guest.table}-${guest.seat}`);
+                if (targetSeatDot) {
+                    targetSeatDot.classList.add('seat-highlighted');
+                }
+
+                // Smooth Scroll
+                targetTableCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function resetHighlights() {
+            document.querySelectorAll('.table-active').forEach(el => el.classList.remove('table-active'));
+            document.querySelectorAll('.seat-highlighted').forEach(el => el.classList.remove('seat-highlighted'));
+            searchResultBanner.classList.add('hidden');
+        }
+
+        // Open Modal Details for Table
+        function openTableModal(tableNum) {
+            const modal = document.getElementById('tableModal');
+            const catKey = getCategoryForTable(tableNum);
+            const catInfo = categories[catKey];
+
+            document.getElementById('modalTitle').innerText = `Masa ${tableNum}`;
+            document.getElementById('modalTableName').innerText = `MASA ${tableNum}`;
+
+            const catBadge = document.getElementById('modalCatBadge');
+            catBadge.innerText = catInfo.name;
+            catBadge.className = `inline-block px-3 py-1 text-xs font-bold rounded-full mb-1 border ${catInfo.badgeClass}`;
+
+            const topSeatsContainer = document.getElementById('modalTopSeats');
+            const bottomSeatsContainer = document.getElementById('modalBottomSeats');
+            const guestListContainer = document.getElementById('modalGuestList');
+
+            topSeatsContainer.innerHTML = '';
+            bottomSeatsContainer.innerHTML = '';
+            guestListContainer.innerHTML = '';
+
+            const tableGuests = guestsDatabase.filter(g => g.table === tableNum);
+
+            for (let s = 1; s <= 12; s++) {
+                const guestAtSeat = tableGuests.find(g => g.seat === s);
+                const seatBox = document.createElement('div');
+                seatBox.className = `p-2 rounded-xl text-center border text-[11px] font-semibold flex flex-col items-center justify-center transition ${
+                    guestAtSeat 
+                    ? 'bg-gold-100 border-gold-400 text-gold-900 shadow-sm' 
+                    : 'bg-white border-gray-200 text-gray-400'
+                }`;
+                
+                seatBox.innerHTML = `
+                    <span class="text-[9px] text-gold-700">№${s}</span>
+                    <span class="truncate w-full font-serif">${guestAtSeat ? guestAtSeat.name.split(' ')[0] : 'Boş'}</span>
+                `;
+
+                if (s <= 6) {
+                    topSeatsContainer.appendChild(seatBox);
+                } else {
+                    bottomSeatsContainer.appendChild(seatBox);
+                }
+            }
+
+            // Render Guest List inside modal
+            if (tableGuests.length > 0) {
+                tableGuests.sort((a, b) => a.seat - b.seat).forEach(g => {
+                    const gItem = document.createElement('div');
+                    gItem.className = 'flex justify-between items-center p-2.5 rounded-xl bg-white border border-gold-200 shadow-sm';
+                    gItem.innerHTML = `
+                        <span class="text-charcoal-900 font-medium"><i class="fas fa-user-circle text-gold-500 me-2"></i>${g.name}</span>
+                        <span class="text-gold-700 font-mono text-xs bg-cream-100 px-2.5 py-1 rounded-lg border border-gold-300 font-bold">Oturacaq ${g.seat}</span>
+                    `;
+                    guestListContainer.appendChild(gItem);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('tableModal').classList.add('hidden');
+        }
+
+        // Music Player Controls
+        const bgMusic = document.getElementById('bgMusic');
+        const musicIcon = document.getElementById('musicIcon');
+        let isPlaying = false;
+
+        function toggleAudio() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicIcon.className = 'fas fa-music text-lg';
+            } else {
+                bgMusic.play().then(() => {
+                    musicIcon.className = 'fas fa-pause text-lg text-gold-600';
+                }).catch(err => {
+                    console.log("Audio playback waiting for user interaction.");
+                });
+            }
+            isPlaying = !isPlaying;
+        }
+    </script>
+</body>
+</html>
